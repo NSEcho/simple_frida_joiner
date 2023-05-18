@@ -20,7 +20,6 @@ func main() {
 	mode := os.Args[3]
 
 	var session *frida.Session
-	var err error
 
 	mgr := frida.NewDeviceManager()
 	mgr.EnumerateDevices()
