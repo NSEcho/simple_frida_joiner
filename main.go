@@ -22,12 +22,12 @@ func main() {
 	var session *frida.Session
 	var err error
 
+	mgr := frida.NewDeviceManager()
+	mgr.EnumerateDevices()
+
+	dev, _ := mgr.LocalDevice()
+
 	if mode == "spawn" {
-		dev := frida.LocalDevice()
-		if dev == nil {
-			fmt.Fprintf(os.Stderr, "[-] Error getting local device: %v\n", err)
-			os.Exit(1)
-		}
 		pid, err := dev.Spawn(target, nil)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[-] Error spawning application: %v\n", err)
@@ -47,7 +47,10 @@ func main() {
 			fmt.Fprintf(os.Stderr, "[-] Error converting pid: %v\n", err)
 			os.Exit(1)
 		}
-		session, err = frida.Attach(targetPid)
+
+		opts := frida.NewSessionOptions(frida.RealmNative, 300)
+
+		session, err = dev.Attach(targetPid, opts)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[-] Error attaching to the pid: %v\n", err)
 			os.Exit(1)
