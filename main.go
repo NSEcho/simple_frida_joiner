@@ -3,9 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/frida/frida-go/frida"
 	"os"
 	"strconv"
+
+	"github.com/frida/frida-go/frida"
 )
 
 func main() {
@@ -19,6 +20,8 @@ func main() {
 	target := os.Args[2]
 	mode := os.Args[3]
 
+	frida.PatchAndroidSELinux() // Comment this line out if you are not on Android
+
 	var session *frida.Session
 
 	mgr := frida.NewDeviceManager()
@@ -26,10 +29,12 @@ func main() {
 
 	dev, _ := mgr.LocalDevice()
 
+	fmt.Println("[*] Got local device:", dev.Name())
+
 	if mode == "spawn" {
 		pid, err := dev.Spawn(target, nil)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[-] Error spawning application: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[-] Error spawning application: %d => %v\n", pid, err)
 			os.Exit(1)
 		}
 		fmt.Printf("[*] Spawned %s with pid %d\n", target, pid)
@@ -40,6 +45,7 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Printf("[*] Attached to the %s(%d)\n", target, pid)
+		dev.Resume(pid)
 	} else {
 		targetPid, err := strconv.Atoi(target)
 		if err != nil {
