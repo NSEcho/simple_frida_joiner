@@ -65,6 +65,10 @@ func main() {
 
 	defer session.Detach()
 
+	session.On("detached", func(reason frida.SessionDetachReason) {
+		fmt.Printf("[*] Session detached: %s\n", reason)
+	})
+
 	fmt.Printf("[*] Attached to the target \"%s\"\n", target)
 
 	popts := frida.NewPortalOptions()
